@@ -1112,6 +1112,27 @@ function updateServerStatus() {
   }
 }
 
+/* 从 URL 参数 ?server=xxx 自动填入服务器地址 */
+function initServerFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const serverUrl = params.get("server");
+  if (serverUrl) {
+    // 清理 URL（去掉 ?server= 参数，保持地址栏干净）
+    const cleanUrl = window.location.pathname + (window.location.hash || "");
+    window.history.replaceState({}, "", cleanUrl);
+
+    // 自动填入服务器地址
+    setApiUrl(serverUrl);
+
+    // 短暂展开配置面板提示用户
+    const configEl = document.getElementById("serverConfig");
+    configEl.classList.add("open");
+    setTimeout(function () {
+      configEl.classList.remove("open");
+    }, 2500);
+  }
+}
+
 function initServerConfig() {
   updateServerStatus();
 
@@ -1150,6 +1171,7 @@ function initServerConfig() {
 function init() {
   loadStorage();
   initServerConfig();
+  initServerFromUrl();  // 从 URL 参数自动填入服务器地址
   renderSidebar();
 
   const conv = getActive();
