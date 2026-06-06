@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>股小助 — 智能股票助手</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   股小助 Web Chat — 墨金雅韵 (Ink-Gold Elegance)
+   多对话版本
+   ============================================ */
+
+:root {
+  --ink: #1c1914;
+  --ink-soft: #3d362b;
+  --ink-mist: #8b8175;
+  --gold: #b8944b;
+  --gold-bright: #d4a843;
+  --gold-warm: #c9a04e;
+  --gold-pale: #f5ecdb;
+  --gold-wash: #faf3e6;
+  --paper: #faf7f1;
+  --paper-warm: #f3efe6;
+  --paper-deep: #ebe5d8;
+  --surface: #fffefb;
+  --surface-dark: #2a2620;
+  --surface-darker: #1e1b17;
+  --vermillion: #b5343a;
+  --vermillion-soft: #c75b5f;
+  --jade: #3d7a5c;
+  --jade-soft: #5a9e7d;
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 3px rgba(28,25,20,0.06);
+  --shadow-md: 0 4px 16px rgba(28,25,20,0.08);
+  --shadow-lg: 0 12px 40px rgba(28,25,20,0.10);
+  --shadow-gold: 0 0 0 3px rgba(184,148,75,0.15);
+
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 150ms;
+  --dur-normal: 300ms;
+  --dur-slow: 500ms;
+
+  --sidebar-w: 280px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 背景氛围 */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 20%, rgba(184,148,75,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 85% 75%, rgba(184,148,75,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 50% 40%, rgba(61,54,43,0.03) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+body::after {
+  content: "";
+  position: fixed; inset: 0; opacity: 0.022;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0;
+}
+
+/* ── 整体布局 ── */
+.app {
+  position: relative; z-index: 1;
+  display: flex;
+  width: 100%;
+  max-width: 1100px;
+  height: 100dvh;
+  background: var(--surface);
+  box-shadow: 0 0 0 1px rgba(28,25,20,0.06), var(--shadow-lg);
+  overflow: hidden;
+}
+
+@media (min-width: 800px) {
+  .app { height: 92dvh; max-height: 900px; border-radius: var(--radius-lg); margin: 0 20px; }
+}
+
+/* ── 侧边栏 ── */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #ece7de 0%, #e6e0d5 100%);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(28,25,20,0.07);
+  z-index: 10;
+  transition: transform var(--dur-normal) var(--ease-smooth);
+}
+
+.sidebar-header {
+  padding: var(--space-lg);
+  border-bottom: 1px solid rgba(28,25,20,0.06);
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.sidebar-brand {
+  display: flex; align-items: center; gap: var(--space-sm);
+}
+
+.sidebar-logo {
+  width: 32px; height: 32px; border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--ink-soft) 0%, var(--ink) 100%);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-family: "ZCOOL XiaoWei", serif; font-size: 1.1rem;
+}
+
+.sidebar-title {
+  color: var(--ink);
+  font-family: "ZCOOL XiaoWei", serif;
+  font-size: 1.05rem; letter-spacing: 0.05em;
+}
+
+.btn-new-chat {
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  border: 1px solid rgba(28,25,20,0.1);
+  background: rgba(28,25,20,0.03);
+  color: var(--ink-soft);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all var(--dur-fast) var(--ease-smooth);
+  font-size: 1.2rem;
+}
+.btn-new-chat:hover { background: rgba(184,148,75,0.12); border-color: var(--gold); color: var(--gold-warm); }
+.btn-new-chat:active { transform: scale(0.94); }
+
+.conversation-list {
+  flex: 1; overflow-y: auto; padding: var(--space-sm);
+  scroll-behavior: smooth;
+}
+.conversation-list::-webkit-scrollbar { width: 3px; }
+.conversation-list::-webkit-scrollbar-track { background: transparent; }
+.conversation-list::-webkit-scrollbar-thumb { background: rgba(28,25,20,0.08); border-radius: 3px; }
+
+.conv-item {
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  cursor: pointer; transition: all var(--dur-fast) var(--ease-smooth);
+  color: var(--ink-mist); font-size: 0.85rem;
+  margin-bottom: 2px; position: relative;
+  animation: convSlideIn 0.3s var(--ease-out) both;
+}
+@keyframes convSlideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.conv-item:hover { background: rgba(28,25,20,0.04); color: var(--ink-soft); }
+.conv-item.active { background: rgba(184,148,75,0.1); color: var(--ink); font-weight: 500; }
+.conv-item.active::before {
+  content: ""; position: absolute; left: 0; top: 6px; bottom: 6px;
+  width: 2px; border-radius: 1px; background: var(--gold);
+}
+
+.conv-item-icon {
+  width: 20px; flex-shrink: 0; font-size: 0.8rem; opacity: 0.5;
+}
+
+.conv-item-text {
+  flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  line-height: 1.4;
+}
+
+.conv-item-actions {
+  display: flex; gap: 2px; opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-smooth);
+}
+.conv-item:hover .conv-item-actions { opacity: 1; }
+
+.conv-item-btn {
+  width: 24px; height: 24px; border: none; background: transparent;
+  color: var(--ink-mist); cursor: pointer; border-radius: var(--radius-xs);
+  font-size: 0.7rem; display: flex; align-items: center; justify-content: center;
+  transition: all var(--dur-fast);
+  opacity: 0.5;
+}
+.conv-item-btn:hover { background: rgba(28,25,20,0.06); color: var(--ink); opacity: 0.9; }
+.conv-item-btn.danger:hover { background: rgba(181,52,58,0.1); color: var(--vermillion); opacity: 1; }
+
+.sidebar-footer {
+  padding: var(--space-sm) var(--space-md);
+  border-top: 1px solid rgba(28,25,20,0.06);
+  font-size: 0.68rem; color: rgba(28,25,20,0.2);
+  letter-spacing: 0.04em;
+}
+
+/* 服务器连接设置 */
+.server-config {
+  padding: var(--space-sm) var(--space-md);
+  border-top: 1px solid rgba(28,25,20,0.06);
+}
+.server-status {
+  display: flex; align-items: center; gap: 6px; cursor: pointer;
+  padding: 6px 8px; border-radius: var(--radius-sm);
+  transition: all var(--dur-fast); font-size: 0.75rem;
+  color: var(--ink-mist);
+}
+.server-status:hover { background: rgba(28,25,20,0.03); }
+.server-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  background: #ccc; transition: background var(--dur-normal);
+}
+.server-dot.online { background: var(--jade); box-shadow: 0 0 6px rgba(61,122,92,0.4); }
+.server-dot.offline { background: #c5b597; }
+.server-config-body {
+  display: none; padding: 8px; gap: 4px;
+}
+.server-config.open .server-config-body { display: flex; flex-direction: column; }
+.server-config input {
+  width: 100%; border: 1px solid rgba(28,25,20,0.1); border-radius: var(--radius-sm);
+  padding: 6px 8px; font-size: 0.72rem; font-family: inherit;
+  background: var(--surface); color: var(--ink); outline: none;
+}
+.server-config input:focus { border-color: var(--gold); }
+.server-config-hint {
+  font-size: 0.65rem; color: var(--ink-mist); line-height: 1.4;
+}
+.server-config-hint a { color: var(--jade); }
+
+/* ── 主区域 ── */
+.main {
+  flex: 1; display: flex; flex-direction: column;
+  min-width: 0;
+}
+
+/* 顶部栏 */
+.chat-header {
+  flex-shrink: 0; padding: var(--space-md) var(--space-xl);
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--paper-deep); background: var(--surface);
+}
+
+/* 移动端汉堡菜单 */
+.btn-menu {
+  display: none;
+  width: 34px; height: 34px; border: none; background: transparent;
+  border-radius: var(--radius-md); cursor: pointer; align-items: center;
+  justify-content: center; color: var(--ink-mist); font-size: 1.2rem;
+  transition: all var(--dur-fast);
+}
+.btn-menu:hover { background: var(--paper-warm); color: var(--ink); }
+
+.header-brand {
+  display: flex; align-items: center; gap: var(--space-md);
+}
+
+.header-logo-m {
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #1c1914 0%, #3d362b 100%);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-family: "ZCOOL XiaoWei", serif; font-size: 1.15rem;
+  box-shadow: 0 2px 8px rgba(28,25,20,0.1);
+}
+
+.header-info h1 {
+  font-family: "ZCOOL XiaoWei", serif; font-size: 1.1rem; font-weight: 400;
+  color: var(--ink); letter-spacing: 0.05em;
+}
+
+.conversation-title {
+  font-size: 0.8rem; color: var(--ink-mist); letter-spacing: 0.04em;
+  max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* 消息区域 */
+.chat-body {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: var(--space-lg) var(--space-xl);
+  scroll-behavior: smooth;
+  display: flex; flex-direction: column; gap: var(--space-lg);
+}
+.chat-body::-webkit-scrollbar { width: 4px; }
+.chat-body::-webkit-scrollbar-track { background: transparent; }
+.chat-body::-webkit-scrollbar-thumb { background: var(--paper-deep); border-radius: 4px; }
+
+/* 欢迎页 */
+.welcome-screen {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: var(--space-xl); gap: var(--space-xl);
+  text-align: center; animation: welcomeReveal 0.7s var(--ease-out) both;
+}
+@keyframes welcomeReveal {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.welcome-illustration { width: 160px; height: 90px; opacity: 0.7; margin-bottom: var(--space-sm); }
+.welcome-illustration svg { width: 100%; height: 100%; }
+
+.welcome-title {
+  font-family: "ZCOOL XiaoWei", serif; font-size: 2rem; font-weight: 400;
+  color: var(--ink); letter-spacing: 0.08em;
+}
+.welcome-subtitle {
+  font-size: 0.9rem; color: var(--ink-mist); letter-spacing: 0.06em; max-width: 300px;
+}
+.welcome-divider {
+  width: 48px; height: 1.5px; background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.welcome-chips {
+  display: flex; flex-wrap: wrap; gap: var(--space-sm); justify-content: center;
+  max-width: 420px;
+}
+
+.chip {
+  padding: 8px 16px; border: 1px solid var(--paper-deep); border-radius: var(--radius-full);
+  background: var(--surface); color: var(--ink-soft); font-size: 0.82rem;
+  cursor: pointer; transition: all var(--dur-fast) var(--ease-smooth);
+  font-family: inherit; white-space: nowrap; user-select: none;
+}
+.chip:hover { border-color: var(--gold); background: var(--gold-wash); color: var(--ink); transform: translateY(-1px); }
+.chip:active { transform: scale(0.96); }
+
+/* 消息气泡 */
+.message-row {
+  display: flex; flex-direction: column; max-width: 82%;
+  animation: msgSlideIn 0.4s var(--ease-out) both;
+}
+@keyframes msgSlideIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.message-row.user { align-self: flex-end; align-items: flex-end; }
+.message-row.bot { align-self: flex-start; align-items: flex-start; }
+
+.msg-meta {
+  font-size: 0.68rem; color: var(--ink-mist); margin-bottom: var(--space-xs);
+  letter-spacing: 0.04em; display: flex; align-items: center; gap: 5px;
+}
+.message-row.user .msg-meta { flex-direction: row-reverse; }
+
+.msg-bubble {
+  padding: 12px 17px; border-radius: var(--radius-lg);
+  font-size: 0.93rem; line-height: 1.7; word-break: break-word;
+}
+.message-row.user .msg-bubble {
+  background: var(--ink); color: #f0ebe0;
+  border-bottom-right-radius: var(--radius-sm);
+  box-shadow: 0 2px 10px rgba(28,25,20,0.12);
+}
+.message-row.bot .msg-bubble {
+  background: var(--surface); color: var(--ink-soft);
+  border: 1px solid var(--paper-deep);
+  border-left: 3px solid var(--gold);
+  border-bottom-left-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Markdown 内容 */
+.msg-bubble strong { font-weight: 600; }
+.message-row.bot .msg-bubble strong { color: var(--ink); }
+.msg-bubble em { color: var(--ink-mist); font-style: italic; }
+.msg-bubble code {
+  background: rgba(28,25,20,0.06); padding: 2px 5px; border-radius: 3px;
+  font-size: 0.88em; font-family: "SF Mono", "Fira Code", monospace;
+}
+.message-row.user .msg-bubble code { background: rgba(255,255,255,0.12); }
+.msg-bubble pre {
+  background: var(--paper-warm); padding: var(--space-md); border-radius: var(--radius-sm);
+  overflow-x: auto; margin: var(--space-sm) 0; font-size: 0.83em;
+}
+.message-row.user .msg-bubble pre { background: rgba(0,0,0,0.25); }
+.msg-bubble table {
+  width: 100%; border-collapse: collapse; margin: var(--space-sm) 0; font-size: 0.88em;
+}
+.msg-bubble th, .msg-bubble td {
+  padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--paper-deep);
+}
+.msg-bubble th { color: var(--ink); font-weight: 600; font-size: 0.8em; }
+.msg-bubble hr { border: none; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: var(--space-md) 0; }
+.msg-bubble h3 { font-family: "Noto Serif SC", serif; font-size: 1.02rem; color: var(--ink); margin-bottom: var(--space-sm); font-weight: 600; }
+.msg-bubble ul, .msg-bubble ol { padding-left: 1.2em; margin: var(--space-sm) 0; }
+.msg-bubble li { margin-bottom: 2px; }
+.msg-bubble blockquote { border-left: 2px solid var(--gold); padding-left: var(--space-md); color: var(--ink-mist); margin: var(--space-sm) 0; }
+.msg-bubble a { color: var(--jade); text-decoration: underline; text-underline-offset: 2px; }
+.msg-bubble .up { color: var(--vermillion); font-weight: 600; }
+.msg-bubble .down { color: var(--jade); font-weight: 600; }
+
+/* 加载动画 */
+.typing-indicator {
+  display: flex; align-items: center; gap: var(--space-sm);
+  padding: var(--space-md) 0; align-self: flex-start;
+  animation: msgSlideIn 0.3s var(--ease-out) both;
+}
+.typing-dots {
+  display: flex; gap: 4px; padding: 9px 15px;
+  background: var(--surface); border: 1px solid var(--paper-deep);
+  border-left: 3px solid var(--gold); border-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--radius-sm);
+}
+.typing-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--gold);
+  animation: inkDrop 1.4s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes inkDrop {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-7px); opacity: 1; }
+}
+.typing-text { font-size: 0.78rem; color: var(--ink-mist); }
+
+/* 错误横幅 */
+.error-banner {
+  align-self: center; padding: 11px 18px; background: #fef2f2;
+  border: 1px solid #fecaca; border-radius: var(--radius-md);
+  color: var(--vermillion); font-size: 0.83rem;
+  display: flex; align-items: center; gap: var(--space-sm);
+  animation: msgSlideIn 0.3s var(--ease-out) both; max-width: 90%;
+}
+.error-banner button {
+  background: none; border: none; color: var(--vermillion);
+  text-decoration: underline; cursor: pointer; font-size: 0.83rem;
+  font-family: inherit; padding: 0;
+}
+
+/* 底部输入 */
+.chat-footer {
+  flex-shrink: 0; padding: var(--space-md) var(--space-xl);
+  padding-bottom: max(var(--space-md), env(safe-area-inset-bottom));
+  border-top: 1px solid var(--paper-deep); background: var(--surface);
+}
+.input-wrapper {
+  display: flex; align-items: flex-end; gap: var(--space-sm);
+  background: var(--paper); border: 1.5px solid var(--paper-deep);
+  border-radius: var(--radius-xl); padding: 5px 5px 5px 18px;
+  transition: all var(--dur-normal) var(--ease-smooth);
+}
+.input-wrapper:focus-within {
+  border-color: var(--gold); box-shadow: var(--shadow-gold); background: var(--surface);
+}
+.chat-input {
+  flex: 1; border: none; background: transparent; font-size: 0.93rem;
+  font-family: inherit; color: var(--ink); resize: none; outline: none;
+  padding: 9px 0; max-height: 120px; line-height: 1.5;
+}
+.chat-input::placeholder { color: var(--ink-mist); opacity: 0.55; }
+
+.btn-send {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
+  border: none; background: linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+  color: var(--gold); cursor: pointer; display: flex; align-items: center;
+  justify-content: center; transition: all var(--dur-fast) var(--ease-smooth);
+  position: relative; overflow: hidden;
+}
+.btn-send::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(184,148,75,0.3) 50%, transparent 60%);
+  animation: shimmer 3s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%,100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+.btn-send:hover { transform: scale(1.05); box-shadow: 0 4px 18px rgba(184,148,75,0.2); }
+.btn-send:active { transform: scale(0.94); }
+.btn-send:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+.btn-send svg { width: 17px; height: 17px; }
+
+/* ── 移动端遮罩 ── */
+.sidebar-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 9; transition: opacity var(--dur-normal);
+}
+
+/* ── 响应式 ── */
+@media (max-width: 799px) {
+  .app { max-width: none; margin: 0; height: 100dvh; border-radius: 0; }
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    transform: translateX(-100%);
+  }
+  .sidebar.open { transform: translateX(0); }
+
+  .sidebar-overlay { display: block; pointer-events: none; opacity: 0; }
+  .sidebar-overlay.visible { pointer-events: auto; opacity: 1; }
+
+  .btn-menu { display: flex; }
+
+  .chat-header { padding: var(--space-sm) var(--space-md); }
+  .header-logo-m { width: 30px; height: 30px; font-size: 1rem; }
+  .header-info h1 { font-size: 1rem; }
+  .conversation-title { max-width: 140px; }
+
+  .chat-body { padding: var(--space-md); gap: var(--space-md); }
+  .chat-footer { padding: var(--space-sm) var(--space-md); }
+  .message-row { max-width: 92%; }
+  .msg-bubble { padding: 11px 14px; font-size: 0.9rem; border-radius: var(--radius-md); }
+  .message-row.user .msg-bubble { border-bottom-right-radius: var(--radius-sm); }
+  .message-row.bot .msg-bubble { border-bottom-left-radius: var(--radius-sm); }
+  .welcome-title { font-size: 1.7rem; }
+  .welcome-subtitle { font-size: 0.85rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- 移动端遮罩 -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app">
+
+  <!-- 侧边栏 ── 对话列表 -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo">助</div>
+        <span class="sidebar-title">股小助</span>
+      </div>
+      <button class="btn-new-chat" id="btnSidebarNew" title="新建对话">+</button>
+    </div>
+
+    <div class="conversation-list" id="convList">
+      <!-- 动态渲染 -->
+    </div>
+
+    <!-- 服务器连接 -->
+    <div class="server-config" id="serverConfig">
+      <div class="server-status" id="serverStatus">
+        <span class="server-dot" id="serverDot"></span>
+        <span id="serverLabel">本地服务器</span>
+        <span style="margin-left:auto;opacity:0.4;font-size:0.65rem;">⚙</span>
+      </div>
+      <div class="server-config-body">
+        <input type="text" id="apiUrlInput" placeholder="https://xxx.ngrok-free.dev">
+        <div class="server-config-hint">
+          填入 ngrok 公网地址后回车。<br>
+          地址可在 <a href="http://127.0.0.1:4040" target="_blank">ngrok 状态页</a> 查看。
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-footer">墨金雅韵 · 实时数据源自新浪财经</div>
+  </aside>
+
+  <!-- 主区域 -->
+  <div class="main">
+
+    <header class="chat-header">
+      <button class="btn-menu" id="btnMenu" aria-label="菜单">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <div class="header-brand">
+        <div class="header-logo-m">助</div>
+        <div class="header-info">
+          <h1>股小助</h1>
+          <div class="conversation-title" id="convTitle">智能股票助手</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="chat-body" id="chatBody">
+      <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-illustration">
+          <svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 85 Q30 40 60 60 Q80 30 110 50 Q130 20 160 45 Q180 30 200 55 L200 100 L0 100Z" fill="rgba(184,148,75,0.12)"/>
+            <path d="M0 90 Q40 55 80 72 Q110 50 150 68 Q175 55 200 70 L200 100 L0 100Z" fill="rgba(184,148,75,0.18)"/>
+            <path d="M0 100 Q25 75 60 85 Q90 68 130 82 Q160 72 200 88 L200 100 L0 100Z" fill="rgba(61,54,43,0.15)"/>
+            <circle cx="150" cy="32" r="10" fill="rgba(212,168,67,0.25)"/>
+            <path d="M45 35 Q48 30 51 35" stroke="rgba(61,54,43,0.2)" stroke-width="0.8" fill="none"/>
+            <path d="M55 30 Q58 26 61 30" stroke="rgba(61,54,43,0.15)" stroke-width="0.6" fill="none"/>
+            <path d="M80 78 L90 78 L88 82 L82 82Z" fill="rgba(61,54,43,0.2)"/>
+            <line x1="86" y1="78" x2="86" y2="72" stroke="rgba(61,54,43,0.15)" stroke-width="0.6"/>
+          </svg>
+        </div>
+        <h2 class="welcome-title">你好，我是股小助</h2>
+        <p class="welcome-subtitle">实时行情 · 智能分析 · 成本追踪<br>键入股票名称或代码，即刻查询</p>
+        <div class="welcome-divider"></div>
+        <div class="welcome-chips">
+          <button class="chip" data-query="茅台现在多少钱">茅台现在多少钱</button>
+          <button class="chip" data-query="上证指数">上证指数</button>
+          <button class="chip" data-query="惠丰钻石行情">惠丰钻石行情</button>
+          <button class="chip" data-query="腾讯控股股价">腾讯控股股价</button>
+          <button class="chip" data-query="记录成本 贵州茅台 1680">记录成本 贵州茅台 1680</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="chat-footer">
+      <div class="input-wrapper" id="inputWrapper">
+        <textarea class="chat-input" id="chatInput" rows="1" placeholder="输入股票名称或代码…"></textarea>
+        <button class="btn-send" id="btnSend" aria-label="发送">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<script>
+/* ============================================
+   股小助 Chat — 多对话管理逻辑
+   ============================================ */
+
+const STORAGE_KEY = "gxz_conversations";
+const ACTIVE_KEY = "gxz_active_conv";
+
+// 对话数据结构: { id, title, conversationId (Dify), messages[], createdAt }
+let store = {
+  conversations: [],  // 按 createdAt 降序排列
+  activeId: null,
+  isLoading: false,
+};
+
+const $ = (sel) => document.querySelector(sel);
+const chatBody = $("#chatBody");
+const chatInput = $("#chatInput");
+const btnSend = $("#btnSend");
+const welcomeScreen = $("#welcomeScreen");
+const convList = $("#convList");
+const convTitle = $("#convTitle");
+const sidebar = $("#sidebar");
+const sidebarOverlay = $("#sidebarOverlay");
+const btnMenu = $("#btnMenu");
+
+/* ── 辅助函数 ── */
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+function getActive() {
+  return store.conversations.find(c => c.id === store.activeId) || null;
+}
+
+function saveStorage() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store.conversations));
+    localStorage.setItem(ACTIVE_KEY, store.activeId || "");
+  } catch (e) {
+    // 超出容量，清理旧对话
+    if (store.conversations.length > 5) {
+      store.conversations = store.conversations.slice(0, 5);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(store.conversations));
+    }
+  }
+}
+
+function loadStorage() {
+  try {
+    store.conversations = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    store.activeId = localStorage.getItem(ACTIVE_KEY) || "";
+    // 确保活跃对话存在
+    if (store.activeId && !store.conversations.find(c => c.id === store.activeId)) {
+      store.activeId = store.conversations.length > 0 ? store.conversations[0].id : null;
+    }
+    // 如果有对话但没有活跃对话，选第一个
+    if (!store.activeId && store.conversations.length > 0) {
+      store.activeId = store.conversations[0].id;
+    }
+  } catch (e) {
+    store.conversations = [];
+    store.activeId = null;
+  }
+}
+
+/* ── 渲染侧边栏 ── */
+function renderSidebar() {
+  convList.innerHTML = "";
+  if (store.conversations.length === 0) {
+    convList.innerHTML = '<div style="padding:24px 16px;text-align:center;color:rgba(28,25,20,0.18);font-size:0.8rem;">还没有对话<br>点击 + 开始吧</div>';
+    return;
+  }
+
+  // 按时间倒序
+  const sorted = [...store.conversations].sort((a, b) => b.createdAt - a.createdAt);
+
+  sorted.forEach(conv => {
+    const item = document.createElement("div");
+    item.className = "conv-item" + (conv.id === store.activeId ? " active" : "");
+    item.dataset.convId = conv.id;
+
+    const title = conv.title || "新对话";
+    item.innerHTML =
+      '<span class="conv-item-icon">💬</span>'
+      + '<span class="conv-item-text">' + escapeHtml(title) + '</span>'
+      + '<span class="conv-item-actions">'
+      + '<button class="conv-item-btn" data-action="rename" title="重命名">✎</button>'
+      + '<button class="conv-item-btn danger" data-action="delete" title="删除">✕</button>'
+      + '</span>';
+
+    item.addEventListener("click", (e) => {
+      // 如果点击的是操作按钮，不触发切换
+      if (e.target.closest("[data-action]")) return;
+      switchConversation(conv.id);
+    });
+
+    item.querySelector("[data-action=rename]").addEventListener("click", (e) => {
+      e.stopPropagation();
+      renameConversation(conv.id);
+    });
+
+    item.querySelector("[data-action=delete]").addEventListener("click", (e) => {
+      e.stopPropagation();
+      deleteConversation(conv.id);
+    });
+
+    convList.appendChild(item);
+  });
+}
+
+function escapeHtml(text) {
+  const d = document.createElement("div");
+  d.textContent = text;
+  return d.innerHTML;
+}
+
+/* ── 新建对话 ── */
+function newConversation() {
+  const conv = {
+    id: genId(),
+    title: "",
+    conversationId: "", // Dify 的 conversation_id
+    messages: [],
+    createdAt: Date.now(),
+  };
+  store.conversations.push(conv);
+  store.activeId = conv.id;
+  saveStorage();
+  renderSidebar();
+  renderChat();
+  chatInput.focus();
+  closeSidebar();
+}
+
+/* ── 切换对话 ── */
+function switchConversation(id) {
+  if (store.activeId === id) return;
+  store.activeId = id;
+  saveStorage();
+  renderSidebar();
+  renderChat();
+  closeSidebar();
+}
+
+/* ── 重命名对话 ── */
+function renameConversation(id) {
+  const conv = store.conversations.find(c => c.id === id);
+  if (!conv) return;
+  const current = conv.title || "新对话";
+  const newName = prompt("为对话命名：", current);
+  if (newName !== null && newName.trim()) {
+    conv.title = newName.trim();
+    saveStorage();
+    renderSidebar();
+    renderChat();
+  }
+}
+
+/* ── 删除对话 ── */
+function deleteConversation(id) {
+  const conv = store.conversations.find(c => c.id === id);
+  if (!conv) return;
+  const name = conv.title || "新对话";
+  if (!confirm("确定删除「" + name + "」？\n\n对话内容将无法恢复。")) return;
+
+  store.conversations = store.conversations.filter(c => c.id !== id);
+  if (store.activeId === id) {
+    store.activeId = store.conversations.length > 0 ? store.conversations[0].id : null;
+  }
+  saveStorage();
+  renderSidebar();
+  renderChat();
+}
+
+/* ── 清空当前对话消息 ── */
+function clearCurrentConversation() {
+  const conv = getActive();
+  if (!conv || conv.messages.length === 0) return;
+  if (!confirm("确定清空当前对话的消息？\n\n（Dify 侧的记忆不会被清除，下次新建对话即可重置）")) return;
+  conv.messages = [];
+  conv.conversationId = "";
+  saveStorage();
+  renderChat();
+}
+
+/* ── 渲染聊天区域 ── */
+function renderChat() {
+  chatBody.querySelectorAll(".message-row, .typing-indicator, .error-banner").forEach(el => el.remove());
+
+  const conv = getActive();
+
+  if (!conv || conv.messages.length === 0) {
+    // 显示欢迎页
+    welcomeScreen.style.display = "";
+    chatBody.classList.remove("has-messages");
+    convTitle.textContent = "智能股票助手";
+  } else {
+    welcomeScreen.style.display = "none";
+    chatBody.classList.add("has-messages");
+    convTitle.textContent = conv.title || "新对话";
+    conv.messages.forEach(m => appendMessageBubble(m, false));
+    scrollToBottom();
+  }
+}
+
+/* ── 发送消息 ── */
+async function sendMessage() {
+  const text = chatInput.value.trim();
+  if (!text || store.isLoading) return;
+
+  // 如果没有活跃对话，自动新建
+  if (!getActive()) {
+    newConversation();
+  }
+
+  const conv = getActive();
+  if (!conv) return;
+
+  // 自动标题：用第一条用户消息的前15字作为标题
+  if (!conv.title && conv.messages.length === 0) {
+    conv.title = text.slice(0, 15);
+  }
+
+  // 隐藏欢迎页
+  welcomeScreen.style.display = "none";
+  chatBody.classList.add("has-messages");
+  convTitle.textContent = conv.title || "新对话";
+
+  // 添加用户消息
+  pushMessage({ role: "user", content: text });
+
+  // 清空输入
+  chatInput.value = "";
+  chatInput.style.height = "auto";
+  btnSend.disabled = true;
+
+  // 加载动画
+  const typingEl = showTyping();
+
+  try {
+    const resp = await fetch(getApiUrl() + "/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: text,
+        user: "web_" + conv.id.slice(0, 8),
+        conversation_id: conv.conversationId || "",
+      }),
+    });
+
+    if (!resp.ok) {
+      throw new Error(resp.status === 502
+        ? "Dify 服务暂时不可用，请稍后再试"
+        : "服务器响应异常 (HTTP " + resp.status + ")");
+    }
+
+    const data = await resp.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    // 保存 Dify conversation_id
+    if (data.conversation_id) {
+      conv.conversationId = data.conversation_id;
+      saveStorage();
+    }
+
+    if (data.answer) {
+      pushMessage({ role: "bot", content: data.answer });
+    } else {
+      pushMessage({ role: "bot", content: "抱歉，暂时无法获取数据，请稍后重试。" });
+    }
+
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    removeTyping(typingEl);
+    store.isLoading = false;
+    btnSend.disabled = false;
+    chatInput.focus();
+  }
+}
+
+function pushMessage(msg) {
+  const conv = getActive();
+  if (!conv) return;
+  conv.messages.push(msg);
+  saveStorage();
+  appendMessageBubble(msg, true);
+  scrollToBottom();
+
+  // 更新标题
+  if (!conv.title && conv.messages.filter(m => m.role === "user").length >= 1) {
+    const first = conv.messages.find(m => m.role === "user");
+    if (first) {
+      conv.title = first.content.slice(0, 15);
+    }
+  }
+  renderSidebar();
+}
+
+/* ── 渲染消息气泡 ── */
+function appendMessageBubble(msg, animate) {
+  const row = document.createElement("div");
+  row.className = "message-row " + msg.role;
+  if (!animate) row.style.animation = "none";
+
+  const now = new Date();
+  const ts = now.getHours().toString().padStart(2, "0") + ":" + now.getMinutes().toString().padStart(2, "0");
+
+  row.innerHTML =
+    '<div class="msg-meta">'
+    + (msg.role === "user" ? "我" : "股小助")
+    + ' <span>·</span> ' + ts
+    + '</div>'
+    + '<div class="msg-bubble">' + renderMarkdown(msg.content) + '</div>';
+
+  chatBody.appendChild(row);
+  if (animate) row.scrollIntoView({ behavior: "smooth", block: "end" });
+}
+
+/* ── 加载动画 ── */
+function showTyping() {
+  const el = document.createElement("div");
+  el.className = "typing-indicator";
+  el.innerHTML =
+    '<div class="typing-dots">'
+    + '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>'
+    + '</div>'
+    + '<span class="typing-text">股小助正在查询…</span>';
+  chatBody.appendChild(el);
+  el.scrollIntoView({ behavior: "smooth", block: "end" });
+  store.isLoading = true;
+  btnSend.disabled = true;
+  return el;
+}
+
+function removeTyping(el) {
+  if (el && el.parentNode) el.parentNode.removeChild(el);
+}
+
+function showError(msg) {
+  const el = document.createElement("div");
+  el.className = "error-banner";
+  el.innerHTML =
+    '<span>⚠</span> ' + escapeHtml(msg)
+    + ' <button onclick="this.parentNode.remove(); retryMessage();">重试</button>';
+  chatBody.appendChild(el);
+  el.scrollIntoView({ behavior: "smooth", block: "end" });
+}
+
+function retryMessage() {
+  const conv = getActive();
+  if (!conv) return;
+  const lastUser = [...conv.messages].reverse().find(m => m.role === "user");
+  if (lastUser) {
+    chatInput.value = lastUser.content;
+    autoResize();
+    sendMessage();
+  }
+}
+
+/* ── 输入框 ── */
+function autoResize() {
+  chatInput.style.height = "auto";
+  chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + "px";
+  if (!store.isLoading) {
+    btnSend.disabled = !chatInput.value.trim();
+  }
+}
+
+function scrollToBottom() {
+  requestAnimationFrame(() => {
+    chatBody.scrollTop = chatBody.scrollHeight;
+  });
+}
+
+/* ── 键盘 ── */
+chatInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+chatInput.addEventListener("input", autoResize);
+
+/* ── 按钮绑定 ── */
+btnSend.addEventListener("click", sendMessage);
+document.getElementById("btnSidebarNew").addEventListener("click", newConversation);
+
+/* ── 移动端侧边栏 ── */
+btnMenu.addEventListener("click", toggleSidebar);
+sidebarOverlay.addEventListener("click", closeSidebar);
+
+function toggleSidebar() {
+  sidebar.classList.toggle("open");
+  sidebarOverlay.classList.toggle("visible");
+}
+function closeSidebar() {
+  sidebar.classList.remove("open");
+  sidebarOverlay.classList.remove("visible");
+}
+
+/* ── 点击欢迎页建议问题 ── */
+document.addEventListener("click", (e) => {
+  const chip = e.target.closest(".chip");
+  if (chip && chip.dataset.query) {
+    chatInput.value = chip.dataset.query;
+    autoResize();
+    sendMessage();
+  }
+});
+
+/* ── Markdown 渲染 ── */
+function renderMarkdown(text) {
+  if (!text) return "";
+  let html = text
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^---$/gm, '<hr>');
+  html = html.replace(/^[*-] (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>');
+  html = html.replace(/^\|(.+)\|$/gm, (match) => {
+    const cells = match.split("|").filter(c => c.trim()).map(c => c.trim());
+    const isSep = cells.every(c => /^[-:]+$/.test(c));
+    if (isSep) return "<!-- ts -->";
+    const tag = match.includes("<!-- ts -->") ? "td" : "th";
+    return "<tr>" + cells.map(c => "<" + tag + ">" + c + "</" + tag + ">").join("") + "</tr>";
+  });
+  html = html.replace(/((?:<tr>.*<\/tr>\n?)+)/g, (match) => {
+    if (match.includes("<th>")) {
+      return "<table><thead>" + match.match(/<tr>.*<th>.*<\/tr>/)[0] + "</thead><tbody>"
+        + match.replace(/<tr>.*<th>.*<\/tr>/, "") + "</tbody></table>";
+    }
+    return "<table>" + match + "</table>";
+  });
+  html = html.replace(/<!-- ts -->\n?/g, "");
+  html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+  html = html.replace(/(?:<\/blockquote>\n?<blockquote>)+/g, '<br>');
+  html = html.replace(/\n\n+/g, '</p><p>');
+  html = html.replace(/\n/g, '<br>');
+  html = '<p>' + html + '</p>';
+  html = html.replace(/<p>\s*<\/p>/g, '');
+  html = html.replace(/<p><(h[1-6]|table|ul|ol|pre|blockquote|hr)/g, '<$1');
+  html = html.replace(/(\/(h[1-6]|table|ul|ol|pre|blockquote)>|<\/hr>)<\/p>/g, '$1');
+  return html;
+}
+
+/* ── API 服务器地址管理 ── */
+const API_STORAGE_KEY = "gxz_api_url";
+
+function getApiUrl() {
+  return localStorage.getItem(API_STORAGE_KEY) || "";
+}
+
+function setApiUrl(url) {
+  url = url.trim().replace(/\/+$/, ""); // 去掉末尾斜杠
+  if (url) {
+    localStorage.setItem(API_STORAGE_KEY, url);
+  } else {
+    localStorage.removeItem(API_STORAGE_KEY);
+  }
+  updateServerStatus();
+}
+
+function updateServerStatus() {
+  const url = getApiUrl();
+  const dot = document.getElementById("serverDot");
+  const label = document.getElementById("serverLabel");
+  const input = document.getElementById("apiUrlInput");
+
+  if (url) {
+    dot.className = "server-dot online";
+    label.textContent = url.replace("https://", "").slice(0, 28);
+    input.value = url;
+  } else {
+    dot.className = "server-dot offline";
+    label.textContent = "本地服务器";
+    input.value = "";
+  }
+}
+
+function initServerConfig() {
+  updateServerStatus();
+
+  const statusEl = document.getElementById("serverStatus");
+  const configEl = document.getElementById("serverConfig");
+  const input = document.getElementById("apiUrlInput");
+
+  statusEl.addEventListener("click", () => {
+    configEl.classList.toggle("open");
+    if (configEl.classList.contains("open")) {
+      input.value = getApiUrl();
+      input.focus();
+    }
+  });
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      setApiUrl(input.value);
+      configEl.classList.remove("open");
+    }
+    if (e.key === "Escape") {
+      input.value = getApiUrl();
+      configEl.classList.remove("open");
+    }
+  });
+
+  // 点击外部关闭
+  document.addEventListener("click", (e) => {
+    if (!configEl.contains(e.target)) {
+      configEl.classList.remove("open");
+    }
+  });
+}
+
+/* ── 启动 ── */
+function init() {
+  loadStorage();
+  initServerConfig();
+  renderSidebar();
+
+  const conv = getActive();
+  if (conv) {
+    convTitle.textContent = conv.title || "新对话";
+  }
+
+  renderChat();
+  chatInput.focus();
+}
+
+init();
+</script>
+
+</body>
+</html>

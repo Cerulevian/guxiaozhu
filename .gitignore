@@ -1,0 +1,5 @@
+server.py
+server.log
+start.bat
+__pycache__/
+*.pyc
