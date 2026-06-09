@@ -291,70 +291,68 @@ body::after {
   max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
-/* 服务器连接横幅（主区域顶部，自包含输入框） */
-.server-banner {
-  margin: 0; font-size: 0.8rem; letter-spacing: 0.04em;
-  user-select: none; flex-shrink: 0; z-index: 3;
+/* 服务器连接面板 */
+.server-panel {
+  flex-shrink: 0; z-index: 3;
+  border-bottom: 1px solid var(--paper-deep);
 }
-.server-banner.no-server {
+
+/* 未配置状态 */
+.server-panel-setup {
+  padding: 14px 20px;
   background: linear-gradient(90deg, #fef7ed 0%, #fff9f0 50%, #fef7ed 100%);
-  border-bottom: 1px solid #f0dba0; color: var(--ink-soft);
+  border-bottom: 1px solid #f0dba0;
 }
-.server-banner.has-server {
-  background: linear-gradient(90deg, #f0f8f2 0%, #f4faf5 50%, #f0f8f2 100%);
-  border-bottom: 1px solid #c8e0ce; color: var(--jade);
+.server-panel-label {
+  font-size: 0.82rem; font-weight: 600; color: var(--ink-soft);
+  margin-bottom: 10px; letter-spacing: 0.03em;
 }
-
-.server-banner-top {
-  display: flex; align-items: center; gap: 8px;
-  padding: 9px 20px; cursor: pointer;
-  transition: background var(--dur-fast);
+.server-panel-row {
+  display: flex; gap: 8px;
 }
-.server-banner-top:hover { opacity: 0.85; }
-.server-banner-dot {
-  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-  transition: all var(--dur-normal);
-}
-.no-server .server-banner-dot {
-  background: #d4a843; box-shadow: 0 0 0 4px rgba(212,168,67,0.2);
-}
-.has-server .server-banner-dot {
-  background: var(--jade); box-shadow: 0 0 6px rgba(61,122,92,0.4);
-}
-.server-banner-text { flex: 1; font-weight: 500; }
-.server-banner-arrow {
-  opacity: 0.5; font-size: 0.65rem; transition: transform var(--dur-fast);
-}
-
-/* 横幅展开区域 */
-.server-banner-body {
-  display: none; padding: 0 20px 12px; gap: 8px; flex-direction: column;
-}
-.server-banner.open .server-banner-body { display: flex; }
-.server-banner.open .server-banner-arrow { transform: rotate(180deg); }
-
-.server-banner-body input {
-  width: 100%; border: 1px solid rgba(28,25,20,0.15); border-radius: var(--radius-sm);
+.server-panel-row input {
+  flex: 1; min-width: 0;
+  border: 1px solid rgba(28,25,20,0.15); border-radius: var(--radius-sm);
   padding: 9px 12px; font-size: 0.82rem; font-family: inherit;
   background: var(--surface); color: var(--ink); outline: none;
-  box-sizing: border-box;
 }
-.server-banner-body input:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(184,148,75,0.12); }
-.server-banner-body input::placeholder { color: var(--ink-mist); opacity: 0.5; }
-
-.server-banner-body button {
-  width: 100%; border: none; border-radius: var(--radius-sm);
-  padding: 9px; font-size: 0.82rem; font-family: inherit;
+.server-panel-row input:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(184,148,75,0.12); }
+.server-panel-row input::placeholder { color: var(--ink-mist); opacity: 0.5; }
+.server-panel-row button {
+  flex-shrink: 0; padding: 9px 18px; border: none; border-radius: var(--radius-sm);
   background: var(--ink); color: var(--gold); cursor: pointer;
-  font-weight: 500; letter-spacing: 0.04em;
-  transition: all var(--dur-fast);
+  font-size: 0.82rem; font-weight: 500; font-family: inherit;
+  letter-spacing: 0.04em; transition: all var(--dur-fast);
 }
-.server-banner-body button:active { transform: scale(0.97); }
+.server-panel-row button:active { transform: scale(0.96); }
 
-.server-banner-hint {
-  font-size: 0.68rem; color: var(--ink-mist); line-height: 1.5;
+.server-panel-hint {
+  font-size: 0.68rem; color: var(--ink-mist); line-height: 1.5; margin-top: 8px;
 }
-.server-banner-hint a { color: var(--jade); }
+.server-panel-hint a { color: var(--jade); }
+
+/* 已配置状态 */
+.server-panel-ok {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 20px;
+  background: linear-gradient(90deg, #f0f8f2 0%, #f4faf5 50%, #f0f8f2 100%);
+  border-bottom: 1px solid #c8e0ce;
+}
+.server-panel-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  background: var(--jade); box-shadow: 0 0 6px rgba(61,122,92,0.4);
+}
+.server-panel-ok-text {
+  flex: 1; font-size: 0.8rem; font-weight: 500; color: var(--jade);
+  letter-spacing: 0.03em;
+}
+.server-panel-change {
+  flex-shrink: 0; border: none; background: none;
+  color: var(--ink-mist); font-size: 0.72rem; cursor: pointer;
+  font-family: inherit; text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.server-panel-change:hover { color: var(--ink); }
 
 /* 消息区域 */
 .chat-body {
@@ -647,19 +645,24 @@ body::after {
       </div>
     </header>
 
-    <!-- 服务器连接横幅（自包含，点击展开输入框） -->
-    <div class="server-banner no-server" id="serverBanner">
-      <div class="server-banner-top">
-        <span class="server-banner-dot"></span>
-        <span class="server-banner-text" id="serverBannerText">点击配置服务器地址</span>
-        <span class="server-banner-arrow" id="serverBannerArrow">▾</span>
-      </div>
-      <div class="server-banner-body">
-        <input type="text" id="bannerInput" placeholder="粘贴 ngrok 地址，如 https://xxx.ngrok-free.dev">
-        <button id="bannerSave">连接</button>
-        <div class="server-banner-hint">
-          在电脑上运行 start.bat 获取地址。启动后打开 <a href="http://127.0.0.1:4040" target="_blank">ngrok 状态页</a> 查看。
+    <!-- 服务器连接面板：未配置时完整显示，已配置后收缩 -->
+    <div class="server-panel" id="serverPanel">
+      <!-- 未配置状态 -->
+      <div class="server-panel-setup" id="serverPanelSetup">
+        <div class="server-panel-label">⚡ 配置服务器地址</div>
+        <div class="server-panel-row">
+          <input type="text" id="bannerInput" placeholder="粘贴 ngrok 地址，如 https://xxx.ngrok-free.dev" autocomplete="off">
+          <button id="bannerSave">连接</button>
         </div>
+        <div class="server-panel-hint">
+          在电脑上运行 start.bat。启动后打开 <a href="http://127.0.0.1:4040" target="_blank" rel="noopener">ngrok 状态页</a> 查看地址。
+        </div>
+      </div>
+      <!-- 已配置状态 -->
+      <div class="server-panel-ok" id="serverPanelOk" style="display:none">
+        <span class="server-panel-dot"></span>
+        <span class="server-panel-ok-text" id="serverPanelOkText"></span>
+        <button class="server-panel-change" id="serverPanelChange">修改</button>
       </div>
     </div>
 
@@ -918,9 +921,10 @@ async function sendMessage() {
   // 检查服务器地址是否已配置
   var apiUrl = getApiUrl();
   if (!apiUrl) {
-    showError("请先配置服务器地址：点击顶部横幅填入 ngrok 地址。");
-    var banner = document.getElementById("serverBanner");
-    banner.classList.add("open");
+    showError("请先在上方输入框中填入 ngrok 服务器地址。");
+    document.getElementById("serverPanelSetup").style.display = "";
+    document.getElementById("serverPanelOk").style.display = "none";
+    document.getElementById("bannerInput").focus();
     return;
   }
 
@@ -1187,20 +1191,23 @@ function setApiUrl(url) {
 
 function updateServerStatus() {
   const url = getApiUrl();
-  const banner = document.getElementById("serverBanner");
-  const bannerText = document.getElementById("serverBannerText");
+  const setupEl = document.getElementById("serverPanelSetup");
+  const okEl = document.getElementById("serverPanelOk");
+  const okText = document.getElementById("serverPanelOkText");
   const bInput = document.getElementById("bannerInput");
 
   if (url) {
-    banner.className = "server-banner has-server";
-    bannerText.textContent = "已连接：" + url.replace("https://", "").slice(0, 30);
+    if (setupEl) setupEl.style.display = "none";
+    if (okEl) okEl.style.display = "flex";
+    if (okText) okText.textContent = "已连接：" + url.replace("https://", "").slice(0, 35);
     if (bInput) bInput.value = url;
   } else {
-    banner.className = "server-banner no-server";
-    bannerText.textContent = "点击配置服务器地址";
+    if (setupEl) setupEl.style.display = "";
+    if (okEl) okEl.style.display = "none";
     if (bInput) bInput.value = "";
   }
-  // 同步侧边栏
+
+  // 同步侧边栏状态
   const sd = document.getElementById("serverDot");
   const sl = document.getElementById("serverLabel");
   const si = document.getElementById("apiUrlInput");
@@ -1216,73 +1223,43 @@ function initServerFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const serverUrl = params.get("server");
   if (serverUrl) {
-    // 清理 URL（去掉 ?server= 参数，保持地址栏干净）
     const cleanUrl = window.location.pathname + (window.location.hash || "");
     window.history.replaceState({}, "", cleanUrl);
-
-    // 自动填入服务器地址
     setApiUrl(serverUrl);
-
-    // 短暂展开横幅提示用户
-    var b = document.getElementById("serverBanner");
-    b.classList.add("open");
-    setTimeout(function () {
-      b.classList.remove("open");
-    }, 2500);
-  }
-
-  // 如果没有配置服务器地址，展开横幅
-  if (!getApiUrl()) {
-    document.getElementById("serverBanner").classList.add("open");
   }
 }
 
 function initServerConfig() {
   updateServerStatus();
 
-  const banner = document.getElementById("serverBanner");
-  const bannerTop = banner.querySelector(".server-banner-top");
   const bInput = document.getElementById("bannerInput");
   const bSave = document.getElementById("bannerSave");
 
-  // 点击横幅 → 展开/收起
-  bannerTop.addEventListener("click", function(e) {
-    e.stopPropagation();
-    banner.classList.toggle("open");
-    if (banner.classList.contains("open")) {
-      bInput.value = getApiUrl();
-      setTimeout(function() { bInput.focus(); }, 100);
-    }
-  });
-
   // 保存按钮
-  bSave.addEventListener("click", function(e) {
-    e.stopPropagation();
+  bSave.addEventListener("click", function() {
     var val = bInput.value.trim();
-    if (val) {
-      setApiUrl(val);
-      banner.classList.remove("open");
-    }
+    if (val) setApiUrl(val);
   });
 
   // 回车保存
   bInput.addEventListener("keydown", function(e) {
     if (e.key === "Enter") {
-      e.stopPropagation();
       var val = bInput.value.trim();
-      if (val) {
-        setApiUrl(val);
-        banner.classList.remove("open");
-      }
+      if (val) setApiUrl(val);
     }
   });
 
-  // 点击外部关闭横幅
-  document.addEventListener("click", function(e) {
-    if (!banner.contains(e.target)) {
-      banner.classList.remove("open");
-    }
-  });
+  // 修改按钮：切回未配置状态
+  const changeBtn = document.getElementById("serverPanelChange");
+  if (changeBtn) {
+    changeBtn.addEventListener("click", function() {
+      setApiUrl("");
+      document.getElementById("serverPanelSetup").style.display = "";
+      document.getElementById("serverPanelOk").style.display = "none";
+      bInput.value = "";
+      bInput.focus();
+    });
+  }
 
   // 侧边栏配置（保留兼容）
   const statusEl = document.getElementById("serverStatus");
