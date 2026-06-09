@@ -291,6 +291,39 @@ body::after {
   max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
+/* 服务器连接横幅（主区域顶部） */
+.server-banner {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 20px; margin: 0;
+  font-size: 0.8rem; letter-spacing: 0.04em;
+  cursor: pointer; user-select: none;
+  transition: all var(--dur-normal);
+  border-bottom: 1px solid transparent;
+}
+.server-banner.no-server {
+  background: linear-gradient(90deg, #fef7ed 0%, #fff9f0 50%, #fef7ed 100%);
+  border-bottom-color: #f0dba0;
+  color: var(--ink-soft); font-weight: 500;
+}
+.server-banner.has-server {
+  background: linear-gradient(90deg, #f0f8f2 0%, #f4faf5 50%, #f0f8f2 100%);
+  border-bottom-color: #c8e0ce;
+  color: var(--jade); font-weight: 500;
+}
+.server-banner:hover { opacity: 0.85; }
+.server-banner-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  transition: all var(--dur-normal);
+}
+.no-server .server-banner-dot {
+  background: #d4a843; box-shadow: 0 0 0 4px rgba(212,168,67,0.2);
+}
+.has-server .server-banner-dot {
+  background: var(--jade); box-shadow: 0 0 6px rgba(61,122,92,0.4);
+}
+.server-banner-text { flex: 1; }
+.server-banner-arrow { opacity: 0.4; font-size: 0.7rem; }
+
 /* 消息区域 */
 .chat-body {
   flex: 1; overflow-y: auto; overflow-x: hidden;
@@ -582,6 +615,13 @@ body::after {
       </div>
     </header>
 
+    <!-- 服务器连接横幅 -->
+    <div class="server-banner no-server" id="serverBanner">
+      <span class="server-banner-dot"></span>
+      <span class="server-banner-text" id="serverBannerText">点击配置服务器地址</span>
+      <span class="server-banner-arrow">→</span>
+    </div>
+
     <div class="chat-body" id="chatBody">
       <div class="welcome-screen" id="welcomeScreen">
         <div class="welcome-illustration">
@@ -833,6 +873,15 @@ function renderChat() {
 async function sendMessage() {
   const text = chatInput.value.trim();
   if (!text || store.isLoading) return;
+
+  // 检查服务器地址是否已配置
+  var apiUrl = getApiUrl();
+  if (!apiUrl) {
+    showError("请先配置服务器地址：点击左侧「服务器连接」填入 ngrok 地址。");
+    var configEl = document.getElementById("serverConfig");
+    configEl.classList.add("open");
+    return;
+  }
 
   // 如果没有活跃对话，自动新建
   if (!getActive()) {
@@ -1100,15 +1149,25 @@ function updateServerStatus() {
   const dot = document.getElementById("serverDot");
   const label = document.getElementById("serverLabel");
   const input = document.getElementById("apiUrlInput");
+  const banner = document.getElementById("serverBanner");
+  const bannerText = document.getElementById("serverBannerText");
 
   if (url) {
     dot.className = "server-dot online";
     label.textContent = url.replace("https://", "").slice(0, 28);
     input.value = url;
+    if (banner) {
+      banner.className = "server-banner has-server";
+      bannerText.textContent = "已连接：" + url.replace("https://", "").slice(0, 30);
+    }
   } else {
     dot.className = "server-dot offline";
-    label.textContent = "本地服务器";
+    label.textContent = "点击配置服务器";
     input.value = "";
+    if (banner) {
+      banner.className = "server-banner no-server";
+      bannerText.textContent = "点击配置服务器地址（需在电脑启动 start.bat 获取 ngrok 地址）";
+    }
   }
 }
 
@@ -1130,6 +1189,12 @@ function initServerFromUrl() {
     setTimeout(function () {
       configEl.classList.remove("open");
     }, 2500);
+  }
+
+  // 如果没有配置服务器地址，自动展开面板并保持打开
+  if (!getApiUrl()) {
+    var configEl = document.getElementById("serverConfig");
+    configEl.classList.add("open");
   }
 }
 
@@ -1165,6 +1230,21 @@ function initServerConfig() {
       configEl.classList.remove("open");
     }
   });
+
+  // 点击顶栏横幅 → 手机端打开侧边栏，展开配置
+  const banner = document.getElementById("serverBanner");
+  if (banner) {
+    banner.addEventListener("click", () => {
+      if (!getApiUrl()) {
+        // 手机端：打开侧边栏
+        sidebar.classList.add("open");
+        sidebarOverlay.classList.add("visible");
+      }
+      configEl.classList.add("open");
+      input.value = getApiUrl();
+      input.focus();
+    });
+  }
 }
 
 /* ── 启动 ── */
